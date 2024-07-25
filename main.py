@@ -1,4 +1,4 @@
-"""System Manager Discord Bot V1.0
+"""System Manager Discord Bot V1.2
 Created by: André G. Padovezi - Rusted Gear Softworks - 2024"""
 
 import discord
@@ -80,24 +80,30 @@ async def gsv(ctx, fun, name):  # Controle de Game_Servers
     try:
         con_name = tra(DB.select(f"SELECT gs_count FROM GAME_Servers WHERE gs_name = '{name}'"))
         path = tra(DB.select(f"SELECT gs_path FROM GAME_Servers WHERE gs_name = '{name}'"))
-        print(con_name, '', path)
+        # print(con_name, '', path)
+        a = str()
         if fun in 'start':
-            Containers.exe(con_name, 'start')
+            a = Containers.exe(con_name, 'start')
             print()
         elif fun == 'stop':
-            Containers.exe(con_name, 'stop')
+            a = Containers.exe(con_name, 'stop')
             print()
         elif fun == 'restart':
-            Containers.exe(con_name, 'restart')
+            a = Containers.exe(con_name, 'restart')
             print()
         elif fun == 'teardown':
-            Containers.compose('down', path)
+            a = Containers.compose('down', path)
             print()
         elif fun == 'recreate':
-            Containers.compose('up', path)
+            a = Containers.compose('up', path)
             print()
         else:
-            await ctx.send('Função Inválida. Funções Suportadas -> start|stop|restart|teardown|recreate')
+            a = '-'
+        if a.returncode != 0:
+            await ctx.send(f'Erro ao executar função:\nCódigo: {a.returncode}\nDescrição:{a.stderr}')
+        else:
+            await ctx.send('Comando executado com sucesso.')
+
     except ReferenceError as e:
         print('Erro de Syntaxe: gsv start|stop|restart|teardown|recreate GAME_SERVER_NAME')
         print(e)
